@@ -142,6 +142,11 @@ Set all read markers to a specific time:
 /slack setallreadmarkers (time in epoch)
 ```
 
+Set the topic
+```
+/topic [topic]
+```
+
 Debug mode:
 ```
 /slack debug
