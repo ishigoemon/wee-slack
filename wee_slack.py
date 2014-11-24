@@ -30,7 +30,8 @@ SLACK_API_TRANSLATOR = {
                               "join"    : "channels.join",
                               "leave"   : "channels.leave",
                               "mark"    : "channels.mark",
-                              "info"    : "channels.info"
+                              "info"    : "channels.info",
+                              "topic"   : "channels.setTopic"
                             },
                             "im": {
                               "history" : "im.history",
@@ -353,6 +354,8 @@ class Channel(SlackThing):
     def set_topic(self, topic):
         topic = topic.encode('ascii', 'ignore')
         w.buffer_set(self.channel_buffer, "title", topic);
+    def set_slack_topic(self, topic):
+        async_slack_api_request(self.server.domain, self.server.token, SLACK_API_TRANSLATOR[self.type]["topic"], {"channel":self.identifier, "topic":topic})
     def open(self, update_remote=True):
         self.create_buffer()
         self.active = True
@@ -557,6 +560,14 @@ def part_command_cb(data, current_buffer, args):
         return w.WEECHAT_RC_OK_EAT
     else:
         return w.WEECHAT_RC_OK
+
+def topic_command_cb(data, current_buffer, args):
+    if channels.find(current_buffer):
+        channel = channels.find(current_buffer)
+        args = args.split()
+        if len(args) > 1:
+            channel.set_slack_topic(args)
+    return w.WEECHAT_RC_OK_EAT
 
 def command_talk(current_buffer, args):
     servers.find(current_domain_name()).users.find(args).open()
@@ -1232,6 +1243,7 @@ if __name__ == "__main__":
         w.hook_command_run('/join', 'join_command_cb', '')
         w.hook_command_run('/part', 'part_command_cb', '')
         w.hook_command_run('/leave', 'part_command_cb', '')
+        w.hook_command_run('/topic', 'topic_command_cb', '')
         w.bar_item_new('slack_typing_notice', 'typing_bar_item_cb', '')
         ### END attach to the weechat hooks we need
 
