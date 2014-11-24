@@ -355,6 +355,7 @@ class Channel(SlackThing):
         topic = topic.encode('ascii', 'ignore')
         w.buffer_set(self.channel_buffer, "title", topic);
     def set_slack_topic(self, topic):
+        topic = " ".join(topic[1:])
         async_slack_api_request(self.server.domain, self.server.token, SLACK_API_TRANSLATOR[self.type]["topic"], {"channel":self.identifier, "topic":topic})
     def open(self, update_remote=True):
         self.create_buffer()
